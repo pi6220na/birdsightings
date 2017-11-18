@@ -1,5 +1,6 @@
 var moment = require('moment');
 
+
 function formatDate(date) {
     // Get the UTC standard date version of this date
     m = moment.utc(date);
@@ -11,8 +12,15 @@ function length(array) {
     return array.length;
 }
 
+function checkHeight(q) {
+
+    console.log('entered checkHeight');
+    return q > 1 && q < 300;
+
+}
 
 module.exports = {
     formatDate : formatDate,
-    length: length
+    length: length,
+    checkHeight: checkHeight
 }

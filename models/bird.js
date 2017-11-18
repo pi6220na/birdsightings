@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
+var helpers = require('../hbhelpers/helpers');
 
 /* Information about a bird species, and dates this bird was seen */
 
@@ -34,6 +35,19 @@ var birdSchema = new mongoose.Schema({
     nest: {
         location: String,
         materials: String
+    },
+    height: {
+        type: Number,
+        min: [1, 'Must be at least 1cm high.'],
+        max: [300, 'Can not be more than 300cm high.'],
+        validate: {
+            validator: function(q) {
+                console.log(q);
+                return q > 1 && q < 300;
+
+            },
+            message: '{VALUE} Error - Height must be greater than 1, less than 300.'
+        }
     }
 });
 
