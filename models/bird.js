@@ -2,6 +2,10 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var helpers = require('../hbhelpers/helpers');
 
+
+var myDateCoord = new Object();
+
+
 /* Information about a bird species, and dates this bird was seen */
 
 var birdSchema = new mongoose.Schema({
@@ -21,17 +25,8 @@ var birdSchema = new mongoose.Schema({
         min: [1, 'Should be at least 1 egg.'],
         max: [50, 'Should not be more than 50 eggs.'] },    // At least 1, no more than 50
     endangered: { type: Boolean, default: false },        // Is bird species threatened with extinction?
-    datesSeen: [ {
-        type: Date,
-        requred: true,
-        validate: {
-            validator: function(d) {
-                if (!d) { return false; }
-                return d.getTime() <= Date.now();
-            },
-            message: 'Date must be a valid date. Date must be now or in the past.'
-        }
-    } ],  // An array of dates a bird of this species was seen. Must be now, or in the past
+    sightInfo: [ myDateCoord ],
+      // An array of objects each containing the date, latitude and longitude a bird of this species was seen. Must be now, or in the past
     nest: {
         location: String,
         materials: String
@@ -50,6 +45,11 @@ var birdSchema = new mongoose.Schema({
         }
     }
 });
+
+
+
+
+
 
 
 var Bird = mongoose.model('Bird', birdSchema);

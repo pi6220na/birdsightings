@@ -46,11 +46,13 @@
 
         <h3>Report a new sighting</h3>
 
+
         <form method="POST" action="/addSighting">
             Sighting date: <input type="date" name="date">
             <input type="hidden" name="_id" value="{{bird._id}}">
             <input type="submit" value="Submit">
         </form>
+
 
         <div class='flash-errors'>
             {{#if messages}}
@@ -62,24 +64,28 @@
 
     <div class="sighting-list">
 
-        <p>Number of sightings: {{length bird.datesSeen}}</p>
+        <p>Number of sightings: {{length bird.sightInfo}}</p>
 
         <div class="sighting">
 
-            {{#each bird.datesSeen}}
-                <script>
+{{#each bird.sightInfo}}
+    {{../bird.sightInfo.averageEggs}}
+{{/each}}
 
-                    d_id.addEventListener("click", function(event){
-                        var sure = confirm("Are you sure you want to delete this?");
-                        if (!sure) {
-                            event.preventDefault();   // don't actually click the button or send a request to the server.
-                        }
+            {{#each bird.sightInfo as |bird bird|}}
+                {{lookup ../bird @index}}
+                {{bird.sightInfo.date}}
+                {{bird.sightInfo.lat}}
+                {{bird.sightInfo.lon}}
 
-                    });
 
-                </script>
-                    <form method="POST" action="/upSighting">{{formatDate this}}<input type="date" name="date"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Update Date"></form>
-                    <form method="POST" action="/deleteDate" name="d_id"><input type="hidden"  type="date" name="date" value="{{this}}"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Delete Date"></form>
+
+                {{bird.sightInfo.date}}<form method="POST" action="/upSighting"><input type="date" name="date"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Update Date"></form>
+                <form method="POST" action="/deleteDate" name="d_id"><input type="hidden"  type="date" name="date" value="{{this}}"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Delete Date"></form>
+                <form method="POST" action="/upSightLat">{{bird.sightInfo.lat}}<input name="lat"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Update Lat"></form>
+                <form method="POST" action="/deleteLat" name="d_id"><input type="hidden" type="date" name="lat" value="{{this.lat}}"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Delete Lat"></form>
+                <form method="POST" action="/upSightLon">{{bird.sightInfo.lat}}<input name="lon"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Update Lon"></form>
+                <form method="POST" action="/deleteLon" name="d_id"><input type="hidden" type="date" name="lon" value="{{this.lon}}"><input type="hidden" name="_id" value="{{../bird._id}}"><input type="submit" value="Delete Lon"></form>
 
             {{else}}
                 <p>No sightings for {{bird.name}}</p>
@@ -117,5 +123,15 @@
 
         });
 
+/*
+        d_id.addEventListener("click", function(event){
+            var sure = confirm("Are you sure you want to delete this?");
+            if (!sure) {
+                event.preventDefault();   // don't actually click the button or send a request to the server.
+            }
+
+        });
+*/
     </script>
+
 

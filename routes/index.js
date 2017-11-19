@@ -12,6 +12,8 @@ var db_url = process.env.MONGO_URL;
 var ObjectID =  require('mongodb').ObjectID;
 
 
+var myDateCoord;
+
 /* GET home page. */
 // router.get('/', function(req, res, next) {
 //   res.render('index', { title: 'Express' });
@@ -107,7 +109,8 @@ router.post('/addSighting', function(req, res, next){
 
 
     // Push new date onto datesSeen array and then sort in date order.
-    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
+    // Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { sightInfo : { $each: [req.body.date], $sort: 1} }, lat: [req.body.lat], lon: [req.body.lon] })
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -157,8 +160,14 @@ router.post('/upSighting', function(req, res, next){
 
     console.log("formatted date = " + m);
 
+    myDateCoord.date = req.body.date;
+    myDateCoord.lat = req.body.lat;
+    myDateCoord.lon = req.body.lon;
+
+
+
     // Push new date onto datesSeen array and then sort in date order.
-    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } })
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [myDateCoord], $sort: 1} } })
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -317,7 +326,7 @@ router.post('/upheight', function(req, res, next){
 
 
                 if (result.ok) {
-                    res.redirect('/');
+                    res.redirect('/bird/' + req.body._id);
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('Bird not found for update');
@@ -374,7 +383,7 @@ router.post('/updescript', function(req, res, next){
 
 
                 if (result.ok) {
-                    res.redirect('/');
+                    res.redirect('/bird/' + req.body._id);
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('Bird not found for update');
@@ -483,7 +492,7 @@ router.post('/upeggs', function(req, res, next){
 
 
                 if (result.ok) {
-                    res.redirect('/');
+                    res.redirect('/bird/' + req.body._id);
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('Bird not found for update');
@@ -541,7 +550,7 @@ router.post('/uploc', function(req, res, next){
 
 
                 if (result.ok) {
-                    res.redirect('/');
+                    res.redirect('/bird/' + req.body._id);
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('Bird not found for update');
@@ -599,7 +608,7 @@ router.post('/upmat', function(req, res, next){
 
 
                 if (result.ok) {
-                    res.redirect('/');
+                    res.redirect('/bird/' + req.body._id);
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('Bird not found for update');
