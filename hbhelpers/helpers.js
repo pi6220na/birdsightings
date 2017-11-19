@@ -23,4 +23,4 @@ module.exports = {
     formatDate : formatDate,
     length: length,
     checkHeight: checkHeight
-}
+};

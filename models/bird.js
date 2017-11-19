@@ -15,7 +15,7 @@ var birdSchema = new mongoose.Schema({
             message: '{VALUE} is not valid, bird name must be at least 2 letters'
         }
     },             // species name e.g. Great Horned Owl. Required and must be unique, and at least 2 letters long.
-    description: String,                                       // e.g. "Large brown owl"
+    descript: String,                                       // e.g. "Large brown owl"
     averageEggs: {
         type: Number,
         min: [1, 'Should be at least 1 egg.'],

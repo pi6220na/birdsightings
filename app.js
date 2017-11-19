@@ -56,15 +56,43 @@ MongoClient.connect(db_url).then( (db) => {
         next();
     });
 
-
+    app.use('/upSighting', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/deleteDate', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
 
     app.use('/delete', function(req, res, next) {
         req.birds = birds;
         next();
     });
-
-
-
+    app.use('/upheight', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/updescript', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/upeggs', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/updanger', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/uploc', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/upmat', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
     app.use('/', index);
 
     // catch 404 and forward to error handler

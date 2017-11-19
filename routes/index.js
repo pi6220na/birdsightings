@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Bird = require('../models/bird');
 var helpers = require('../hbhelpers/helpers');
+var moment = require('moment');
 
 
 var MongoClient = require('mongodb').MongoClient;
@@ -100,14 +101,123 @@ router.get('/bird/:_id', function(req, res, next){
 /* POST to add a new sighting for a bird. Bird _id expected in body */
 router.post('/addSighting', function(req, res, next){
 
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+
     // Push new date onto datesSeen array and then sort in date order.
-    Bird.findOneAndUpdate( {_id : req.body._id}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
             }
             else {
                 res.status(404);  next(Error("Attempt to add sighting to bird not in database"))
+            }
+        })
+        .catch( (err) => {
+
+            console.log(err);
+
+            if (err.name === 'CastError') {
+                req.flash('error', 'Date must be in a valid date format');
+                res.redirect('/bird/' + req.body._id);
+            }
+            else if (err.name === 'ValidationError') {
+                req.flash('error', err.message);
+                res.redirect('/bird/' + req.body._id);
+            }
+            else {
+                next(err);
+            }
+        });
+
+});
+
+
+/* POST to updated existing sighting for a bird. Bird _id expected in body */
+router.post('/upSighting', function(req, res, next){
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+
+    n = moment(req.body.date);
+    m = moment.utc(n);
+
+
+    console.log('updating or adding date = ' + req.body.date);
+    console.log('id = ' + req.body._id);
+
+    // Format it for the current server timezone
+    //req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
+    req.body.date = moment.utc(n);
+
+    console.log("formatted date = " + m);
+
+    // Push new date onto datesSeen array and then sort in date order.
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } })
+        .then( (doc) => {
+            if (doc) {
+                res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
+            }
+            else {
+                res.status(404);  next(Error("Attempt to add sighting to bird not in database"))
+            }
+        })
+        .catch( (err) => {
+
+            console.log(err);
+
+            if (err.name === 'CastError') {
+                req.flash('error', 'Date must be in a valid date format');
+                res.redirect('/bird/' + req.body._id);
+            }
+            else if (err.name === 'ValidationError') {
+                req.flash('error', err.message);
+                res.redirect('/bird/' + req.body._id);
+            }
+            else {
+                next(err);
+            }
+        });
+
+});
+
+
+/* POST to delete existing sighting for a bird. Bird _id expected in body */
+router.post('/deleteDate', function(req, res, next){
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+
+    n = moment(req.body.date);
+    m = moment.utc(n);
+
+
+    console.log('updating or adding date = ' + req.body.date);
+    console.log('id = ' + req.body._id);
+
+    // Format it for the current server timezone
+    //req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
+    //req.body.date = moment.ISO_8601(m);
+
+    console.log("formatted date = " + req.body.date);
+    console.log("n = " + n);
+    console.log("m = " + m);
+
+    // Push new date onto datesSeen array and then sort in date order.
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $pull : { datesSeen : m } })
+        .then( (doc) => {
+            if (doc) {
+                res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
+            }
+            else {
+                res.status(404);  next(Error("Attempt to delete sighting to bird not in database"))
             }
         })
         .catch( (err) => {
@@ -153,7 +263,346 @@ router.post('/delete', function(req, res, next){
                     res.redirect('/');
                 } else {
                     // The task was not found. Report 404 error.
-                    var notFound = Error('Task not found');
+                    var notFound = Error('Bird not found for delete');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+
+
+
+/* POST task update */
+router.post('/upheight', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var bird = Bird(req.body);
+
+
+    // Have to re-arrange the form data to match our nested schema.
+    // Form data can only be key-value pairs.
+    bird.nest = {
+        location: req.body.nestLocation,
+        materials: req.body.nestMaterials
+    };
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found');
+        notFound.status = 404;
+        next(notFound);
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('height = ' + req.body.height);
+
+        //Logic to update the item                      { $each: [req.body.date], $sort: 1} } }, {runValidators : true}
+        Bird.updateOne({ _id: ObjectID(_id) }, { $set : { height: req.body.height }}, {runValidators : true})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('Bird not found for update');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+/* POST update */
+router.post('/updescript', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var bird = Bird(req.body);
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+    // Have to re-arrange the form data to match our nested schema.
+    // Form data can only be key-value pairs.
+    bird.nest = {
+        location: req.body.nestLocation,
+        materials: req.body.nestMaterials
+    };
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found');
+        notFound.status = 404;
+        next(notFound);
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('descript = ' + req.body.descript);
+
+        //Logic to update the item
+        Bird.updateOne({ _id: ObjectID(_id) }, { $set : { descript: req.body.descript }}, {runValidators : true})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('Bird not found for update');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+
+/* POST update */
+router.post('/updanger', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var bird = Bird(req.body);
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found');
+        notFound.status = 404;
+        next(notFound);
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('endangered = ' + req.body.endangered);
+
+        //Logic to update the item
+        Bird.updateOne({ _id: ObjectID(_id) }, { $set : { endangered: req.body.endangered }}, {runValidators : true})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('Bird not found for update');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+
+/* POST update */
+router.post('/upeggs', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var bird = Bird(req.body);
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+    // Have to re-arrange the form data to match our nested schema.
+    // Form data can only be key-value pairs.
+    bird.nest = {
+        location: req.body.nestLocation,
+        materials: req.body.nestMaterials
+    };
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found');
+        notFound.status = 404;
+        next(notFound);
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('eggs = ' + req.body.averageEggs);
+
+        //Logic to update the item
+        Bird.updateOne({ _id: ObjectID(_id) }, { $set : { averageEggs: req.body.averageEggs }}, {runValidators : true})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('Bird not found for update');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+/* POST update */
+router.post('/uploc', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var bird = Bird(req.body);
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+    // Have to re-arrange the form data to match our nested schema.
+    // Form data can only be key-value pairs.
+    bird.nest = {
+        location: req.body.nestLocation,
+        materials: req.body.nestMaterials
+    };
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found');
+        notFound.status = 404;
+        next(notFound);
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('nestMaterial = ' + req.body.nestMaterials);
+        console.log('bird.Location = ' + req.body.nestLocation);
+
+        //Logic to update the item
+        Bird.update({ _id: ObjectID(_id) }, { $set : { nest: bird.nest }}, {runValidators : true})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('Bird not found for update');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+/* POST update */
+router.post('/upmat', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var bird = Bird(req.body);
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+    // Have to re-arrange the form data to match our nested schema.
+    // Form data can only be key-value pairs.
+    bird.nest = {
+        location: req.body.nestLocation,
+        materials: req.body.nestMaterials
+    };
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found');
+        notFound.status = 404;
+        next(notFound);
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('nestMaterial = ' + req.body.nestMaterials);
+        console.log('bird.Location = ' + req.body.nestLocation);
+
+        //Logic to update the item
+        Bird.update({ _id: ObjectID(_id) }, { $set : { nest: bird.nest }}, {runValidators : true})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('Bird not found for update');
                     notFound.status = 404;
                     next(notFound);
                 }
