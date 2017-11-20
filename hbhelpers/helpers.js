@@ -18,9 +18,20 @@ function checkHeight(q) {
     return q > 1 && q < 300;
 
 }
+/*
+Handlebars.registerHelper('json', function(context) {
+    return JSON.stringify(context);
+});
+*/
+function jHelp(j) {
+    return JSON.stringify(j);
+}
+
+
 
 module.exports = {
     formatDate : formatDate,
     length: length,
-    checkHeight: checkHeight
+    checkHeight: checkHeight,
+    jHelp: jHelp
 };

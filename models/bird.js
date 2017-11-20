@@ -3,7 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var helpers = require('../hbhelpers/helpers');
 
 
-var myDateCoord = new Object();
+var myDateObj = new Object();
 
 
 /* Information about a bird species, and dates this bird was seen */
@@ -25,7 +25,10 @@ var birdSchema = new mongoose.Schema({
         min: [1, 'Should be at least 1 egg.'],
         max: [50, 'Should not be more than 50 eggs.'] },    // At least 1, no more than 50
     endangered: { type: Boolean, default: false },        // Is bird species threatened with extinction?
-    sightInfo: [ myDateCoord ],
+    sightInfo: [{
+        aID: {type: String},
+        myDateCoord: myDateObj
+    }],
       // An array of objects each containing the date, latitude and longitude a bird of this species was seen. Must be now, or in the past
     nest: {
         location: String,

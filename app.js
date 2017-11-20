@@ -93,6 +93,14 @@ MongoClient.connect(db_url).then( (db) => {
         req.birds = birds;
         next();
     });
+    app.use('/upSightLat', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
+    app.use('/upSightLon', function(req, res, next) {
+        req.birds = birds;
+        next();
+    });
     app.use('/', index);
 
     // catch 404 and forward to error handler
@@ -117,7 +125,6 @@ MongoClient.connect(db_url).then( (db) => {
     console.log('Error connecting to MongoDB', err);
     process.exit(-1);
 });
-
 
 
 
