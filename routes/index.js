@@ -260,10 +260,34 @@ router.post('/deleteSighting', function(req, res, next){
     // Push new date onto datesSeen array and then sort in date order. { $pull: { fruits: { $in: [ "apples", "oranges" ] }
     // Bird.updateOne( {_id: ObjectID(req.body._id)},  { $pull : { myData: { mydata: ObjectID(req.body.aID) }}}) { $set : { 'myData.$.myDateObj': myDateObj }
 
-    Bird.update( {_id: ObjectID(req.body._id)},  { $pull : { $in: {  mydata: ObjectID(req.body.aID) }}})
+/*
+    Dive.update({ _id: diveId }, { "$pull": { "divers": { "user": userIdToRemove } }}, { safe: true, multi:true }, function(err, obj) {
+        //do something smart
+    });
+*/
 
+    // Bird.update( {_id: ObjectID(req.body._id)},  { $pull : { $in: {  mydata: ObjectID(req.body.aID), myDateObj }}})
+    Bird.update( {_id: ObjectID(req.body._id)},  { $pull : {  mydata: myDateObj }} )
         .then( (doc) => {
+            /*
+            for (item in doc) {
+                console.log('doc = ' + doc[item]);
+            }
 
+            for (item in res) {
+                console.log('res item = ' + item);
+            }
+
+            console.log('next = ' + next)
+
+            for (item in next) {
+                console.log('next item = ' + next[item]);
+            }
+
+            for (item in res) {
+                console.log('res item = ' + item);
+            }
+            */
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
             }
