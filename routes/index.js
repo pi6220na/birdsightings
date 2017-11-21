@@ -133,11 +133,12 @@ router.post('/addSighting', function(req, res, next){
     console.log('myDateObj.lon = ' + myDateObj.lon);
 
     console.log('req.body._id = ' + req.body._id);
-    var _id = req.body._id;
+    var a_id = new ObjectID;
+
 
     //console.log('_id converted = ' + ObjectID(_id) );
 
-    console.log('_id = ' + _id);
+    console.log('a_id = ' + a_id);
     //console.log('_id converted = ' + ObjectID(_id).str );
 
     // Push new date onto datesSeen array and then sort in date order.
@@ -188,7 +189,7 @@ router.post('/upSighting', function(req, res, next){
 
 
     console.log('updating or adding date = ' + req.body.date);
-    console.log('id = ' + req.body.bird._id);
+    console.log('id = ' + req.body._id);
 
     //console.log("formatted date = " + m);
     var myDateObj = new Object();
@@ -198,102 +199,8 @@ router.post('/upSighting', function(req, res, next){
 
 
 
-    // Push new date onto datesSeen array and then sort in date order.
-    Bird.findOneAndUpdate( {_id: ObjectID(req.body.bird._id)},  { $set : {  myData: { myDateObj }}})
-        .then( (doc) => {
-            if (doc) {
-                res.redirect('/bird/' + req.body.bird._id);   // Redirect to this bird's info page
-            }
-            else {
-                res.status(404);  next(Error("Attempt to add sighting to bird not in database"))
-            }
-        })
-        .catch( (err) => {
-
-            console.log(err);
-
-            if (err.name === 'CastError') {
-                req.flash('error', 'Date must be in a valid date format');
-                res.redirect('/bird/' + req.body._id);
-            }
-            else if (err.name === 'ValidationError') {
-                req.flash('error', err.message);
-                res.redirect('/bird/' + req.body._id);
-            }
-            else {
-                next(err);
-            }
-        });
-
-});
-
-
-/* POST to updated existing sighting for a bird. Bird _id expected in body */
-router.post('/upSightLon', function(req, res, next){
-
-    for (item in req.body) {
-        console.log('body item = ' + item + ' -> ' + req.body[item]);
-    }
-
-
-    console.log('updating or adding date = ' + req.body.date);
-    console.log('id = ' + req.body._id);
-    console.log("formatted date = " + req.body.date);
-
-    var myDateObj = new Object();
-    myDateObj.date = req.body.date;
-    myDateObj.lat = req.body.lat;
-    myDateObj.lon = req.body.lon;
-
-    // Push new date onto datesSeen array and then sort in date order. { $set : { myData : [myDateObj] } })
-    Bird.findByIdAndUpdate( {_id: ObjectID(req.body._id)},  { $set : {  myData: { _id : req.body.aID, myDateObj }}})
-        .then( (doc) => {
-            if (doc) {
-                res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
-            }
-            else {
-                res.status(404);  next(Error("Attempt to update lon sighting to bird not in database"))
-            }
-        })
-        .catch( (err) => {
-
-            console.log(err);
-
-            if (err.name === 'CastError') {
-                req.flash('error', 'Date must be in a valid date format');
-                res.redirect('/bird/' + req.body._id);
-            }
-            else if (err.name === 'ValidationError') {
-                req.flash('error', err.message);
-                res.redirect('/bird/' + req.body._id);
-            }
-            else {
-                next(err);
-            }
-        });
-
-});
-
-
-
-/* POST to updated existing sighting for a bird. Bird _id expected in body */
-router.post('/upSightLat', function(req, res, next){
-
-    for (item in req.body) {
-        console.log('body item = ' + item + ' -> ' + req.body[item]);
-    }
-
-    console.log('updating or adding date = ' + req.body.date);
-    console.log('_id = ' + req.body._id);
-    console.log('aID = ' + req.body.aID);
-
-    var myDateObj = new Object();
-    myDateObj.date = req.body.date;
-    myDateObj.lat = req.body.lat;
-    myDateObj.lon = req.body.lon;
-
-    // Push new date onto datesSeen array and then sort in date order.
-    Bird.findByIdAndUpdate( {_id: ObjectID(req.body._id)},  { $set : {  myData: { _id : req.body.aID, myDateObj }}})
+    // Push new date onto datesSeen array and then sort in date order. {_id: ObjectID(req.body._id)},
+    Bird.update(  {'myData._id': ObjectID(req.body.aID)}, { $set : { 'myData.$.myDateObj': myDateObj } })
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -320,11 +227,10 @@ router.post('/upSightLat', function(req, res, next){
         });
 
 });
-
 
 
 /* POST to delete existing sighting for a bird. Bird _id expected in body */
-router.post('/deleteDate', function(req, res, next){
+router.post('/deleteSighting', function(req, res, next){
 
     for (item in req.body) {
         console.log('body item = ' + item + ' -> ' + req.body[item]);
@@ -349,10 +255,13 @@ router.post('/deleteDate', function(req, res, next){
     myDateObj.lat = req.body.lat;
     myDateObj.lon = req.body.lon;
 
-
+    // { 'myData.$.myDateObj': myDateObj }
 
     // Push new date onto datesSeen array and then sort in date order. { $pull: { fruits: { $in: [ "apples", "oranges" ] }
-    Bird.updateOne( {_id: ObjectID(req.body._id)},  { $pull : { myData: { _id : req.body.aID, myDateObj }}})
+    // Bird.updateOne( {_id: ObjectID(req.body._id)},  { $pull : { myData: { mydata: ObjectID(req.body.aID) }}}) { $set : { 'myData.$.myDateObj': myDateObj }
+
+    Bird.update( {_id: ObjectID(req.body._id)},  { $pull : { $in: {  mydata: ObjectID(req.body.aID) }}})
+
         .then( (doc) => {
 
             if (doc) {

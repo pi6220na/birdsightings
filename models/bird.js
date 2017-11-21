@@ -32,7 +32,7 @@ var birdSchema = new mongoose.Schema({
     endangered: { type: Boolean, default: false },        // Is bird species threatened with extinction?
 
     myData: [
-               {arrayId: {type: String, myDateObj: {type: Object}}}
+               {arrayId: {type: String}, myDateObj: {type: Object}}
             ],
 
       // An array of objects each containing the date, latitude and longitude a bird of this species was seen. Must be now, or in the past

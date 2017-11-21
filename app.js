@@ -60,7 +60,7 @@ MongoClient.connect(db_url).then( (db) => {
         req.birds = birds;
         next();
     });
-    app.use('/deleteDate', function(req, res, next) {
+    app.use('/deleteSighting', function(req, res, next) {
         req.birds = birds;
         next();
     });
@@ -90,14 +90,6 @@ MongoClient.connect(db_url).then( (db) => {
         next();
     });
     app.use('/upmat', function(req, res, next) {
-        req.birds = birds;
-        next();
-    });
-    app.use('/upSightLat', function(req, res, next) {
-        req.birds = birds;
-        next();
-    });
-    app.use('/upSightLon', function(req, res, next) {
         req.birds = birds;
         next();
     });
