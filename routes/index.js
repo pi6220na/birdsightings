@@ -12,7 +12,7 @@ var db_url = process.env.MONGO_URL;
 var ObjectID =  require('mongodb').ObjectID;
 
 
-var myDateCoord;
+var myDateObj;
 
 /* GET home page. */
 // router.get('/', function(req, res, next) {
@@ -122,22 +122,27 @@ router.post('/addSighting', function(req, res, next){
     //req.body.date = moment.utc(n);
 
     console.log("formatted date = " + m);
-    var myDateCoord = new Object();
-    myDateCoord.date = req.body.date;
-    myDateCoord.lat = req.body.lat;
-    myDateCoord.lon = req.body.lon;
+    var myDateObj = new Object();
+    myDateObj.date = req.body.date;
+    myDateObj.lat = req.body.lat;
+    myDateObj.lon = req.body.lon;
 
     console.log('well...?')
-    console.log('myDateCoord.date = ' + myDateCoord.date);
-    console.log('myDateCoord.lat = ' + myDateCoord.lat);
-    console.log('myDateCoord.lon = ' + myDateCoord.lon);
+    console.log('myDateObj.date = ' + myDateObj.date);
+    console.log('myDateObj.lat = ' + myDateObj.lat);
+    console.log('myDateObj.lon = ' + myDateObj.lon);
 
-    var _id = mongoose.Types.ObjectId;
+    console.log('req.body._id = ' + req.body._id);
+    var _id = req.body._id;
+
+    //console.log('_id converted = ' + ObjectID(_id) );
+
     console.log('_id = ' + _id);
+    //console.log('_id converted = ' + ObjectID(_id).str );
 
     // Push new date onto datesSeen array and then sort in date order.
     // Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
-    Bird.update( {_id: ObjectID(req.body._id)}, { $push : {  sightInfo: { aID : _id, myDateCoord }}})
+    Bird.update( {_id: ObjectID(req.body._id)}, { $push : {  myData: { myDateObj }}})
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -183,21 +188,21 @@ router.post('/upSighting', function(req, res, next){
 
 
     console.log('updating or adding date = ' + req.body.date);
-    console.log('id = ' + req.body._id);
+    console.log('id = ' + req.body.bird._id);
 
     //console.log("formatted date = " + m);
-    var myDateCoord = new Object();
-    myDateCoord.date = req.body.date;
-    myDateCoord.lat = req.body.lat;
-    myDateCoord.lon = req.body.lon;
+    var myDateObj = new Object();
+    myDateObj.date = req.body.date;
+    myDateObj.lat = req.body.lat;
+    myDateObj.lon = req.body.lon;
 
 
 
     // Push new date onto datesSeen array and then sort in date order.
-    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [myDateCoord], $sort: 1} } })
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body.bird._id)},  { $set : {  myData: { myDateObj }}})
         .then( (doc) => {
             if (doc) {
-                res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
+                res.redirect('/bird/' + req.body.bird._id);   // Redirect to this bird's info page
             }
             else {
                 res.status(404);  next(Error("Attempt to add sighting to bird not in database"))
@@ -235,13 +240,13 @@ router.post('/upSightLon', function(req, res, next){
     console.log('id = ' + req.body._id);
     console.log("formatted date = " + req.body.date);
 
-    var myDateCoord = new Object();
-    myDateCoord.date = req.body.date;
-    myDateCoord.lat = req.body.lat;
-    myDateCoord.lon = req.body.lon;
+    var myDateObj = new Object();
+    myDateObj.date = req.body.date;
+    myDateObj.lat = req.body.lat;
+    myDateObj.lon = req.body.lon;
 
-    // Push new date onto datesSeen array and then sort in date order. { $set : { sightInfo : [myDateCoord] } })
-    Bird.update( {_id: ObjectID(req.body._id)}, { $push : { sightInfo : { $each : [myDateCoord] }}})
+    // Push new date onto datesSeen array and then sort in date order. { $set : { myData : [myDateObj] } })
+    Bird.findByIdAndUpdate( {_id: ObjectID(req.body._id)},  { $set : {  myData: { _id : req.body.aID, myDateObj }}})
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -279,15 +284,16 @@ router.post('/upSightLat', function(req, res, next){
     }
 
     console.log('updating or adding date = ' + req.body.date);
-    console.log('id = ' + req.body._id);
+    console.log('_id = ' + req.body._id);
+    console.log('aID = ' + req.body.aID);
 
-    var myDateCoord = new Object();
-    myDateCoord.date = req.body.date;
-    myDateCoord.lat = req.body.lat;
-    myDateCoord.lon = req.body.lon;
+    var myDateObj = new Object();
+    myDateObj.date = req.body.date;
+    myDateObj.lat = req.body.lat;
+    myDateObj.lon = req.body.lon;
 
     // Push new date onto datesSeen array and then sort in date order.
-    Bird.update( {_id: ObjectID(req.body._id)}, { $push : { sightInfo : { $each : [myDateCoord] }}})
+    Bird.findByIdAndUpdate( {_id: ObjectID(req.body._id)},  { $set : {  myData: { _id : req.body.aID, myDateObj }}})
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -326,8 +332,10 @@ router.post('/deleteDate', function(req, res, next){
 
 
 
-    console.log('updating or adding date = ' + req.body.date);
-    console.log('id = ' + req.body._id);
+    console.log('deleteingggggggggggggggggggggggg date = ' + req.body.date);
+    console.log('aID = ' + req.body.aID);
+    console.log('_id = ' + req.body._id);
+
 
     // Format it for the current server timezone
     //req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
@@ -336,15 +344,15 @@ router.post('/deleteDate', function(req, res, next){
     console.log("formatted date = " + req.body.date);
 
 
-    var myDateCoord = new Object();
-    myDateCoord.date = req.body.date;
-    myDateCoord.lat = req.body.lat;
-    myDateCoord.lon = req.body.lon;
+    var myDateObj = new Object();
+    myDateObj.date = req.body.date;
+    myDateObj.lat = req.body.lat;
+    myDateObj.lon = req.body.lon;
 
 
 
     // Push new date onto datesSeen array and then sort in date order. { $pull: { fruits: { $in: [ "apples", "oranges" ] }
-    Bird.update( {_id: ObjectID(req.body._id)}, { $pull : {sightInfo: ObjectID(req.body.aID), myDateCoord: myDateCoord}} )
+    Bird.updateOne( {_id: ObjectID(req.body._id)},  { $pull : { myData: { _id : req.body.aID, myDateObj }}})
         .then( (doc) => {
 
             if (doc) {
