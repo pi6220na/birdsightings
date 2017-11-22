@@ -204,7 +204,7 @@ router.post('/upSighting', function(req, res, next){
     //Bird.update(  {'myData._id': ObjectID(req.body.aID)}, { $set : { 'myData.sightingArray': [myDateObj] } })
 
    //   Bird.findOneAndUpdate( {_id : req.body._id}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
-    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id) },  { $push : { 'sightData.$.aID': req.body.aID, 'sightData.$.date': z, 'sightData.$.lat': req.body.lat, 'sightData.$.lon': req.body.lon }})
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id) },  { $push: { sightData : { 'sightData.$.aID': req.body.aID, 'sightData.$.date': z, 'sightData.$.lat': req.body.lat, 'sightData.$.lon': req.body.lon }}})
    // Bird.findOneAndUpdate( { aID: req.body.aID }, { sightData: {  aID: req.body.aID , date: z, lat: req.body.lat, lon: req.body.lon }},false,true)
         .then( (doc) => {
             if (doc) {
