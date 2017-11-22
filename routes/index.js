@@ -108,42 +108,25 @@ router.post('/addSighting', function(req, res, next){
     }
 
 
-    n = moment(req.body.date);
-    m = moment.utc(n);
+    //n = moment(req.body.date);
+    //m = moment.utc(n);
+    var m = moment(req.body.date, moment.ISO_8601);
 
-
-    console.log('updating or adding date = ' + req.body.date);
+    console.log('updating or adding date = ' + m);
     console.log('id = ' + req.body._id);
     console.log('lat = ' + req.body.lat);
     console.log('lon = ' + req.body.lon);
 
     // Format it for the current server timezone
-    req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
+    //req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
     //req.body.date = moment.utc(n);
 
-    console.log("formatted date = " + m);
-    var myDateObj = new Object();
-    myDateObj.date = req.body.date;
-    myDateObj.lat = req.body.lat;
-    myDateObj.lon = req.body.lon;
+    //console.log("formatted date = " + m);
 
-    console.log('well...?')
-    console.log('myDateObj.date = ' + myDateObj.date);
-    console.log('myDateObj.lat = ' + myDateObj.lat);
-    console.log('myDateObj.lon = ' + myDateObj.lon);
-
-    console.log('req.body._id = ' + req.body._id);
-    var a_id = new ObjectID;
-
-
-    //console.log('_id converted = ' + ObjectID(_id) );
-
-    console.log('a_id = ' + a_id);
-    //console.log('_id converted = ' + ObjectID(_id).str );
 
     // Push new date onto datesSeen array and then sort in date order.
     // Bird.findOneAndUpdate( {_id: ObjectID(req.body._id)}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
-    Bird.update( {_id: ObjectID(req.body._id)}, { $push : {  myData: { myDateObj }}})
+    Bird.updateOne( {_id: ObjectID(req.body._id)}, { $push : {  sightData: { date: m, lat: req.body.lat, lon: req.body.lon }}})
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -179,28 +162,50 @@ router.post('/upSighting', function(req, res, next){
         console.log('body item = ' + item + ' -> ' + req.body[item]);
     }
 
-
+/*
     n = moment(req.body.date);
     m = moment.utc(n);
 
     // Format it for the current server timezone
     req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
-    //req.body.date = moment.ISO_8601(m);
+    req.body.date = moment.ISO_8601(m);
+*/
 
 
-    console.log('updating or adding date = ' + req.body.date);
+    //n = moment(req.body.date,'MM DD YYYY').toDate();
+    var n = new Date(req.body.date);
+    console.log('date new = ' + n);
+
+    //m = moment.utc(n);
+
+    //var test = moment(req.body.date).isValid();
+    //console.log('test is ' + test);
+
+
+    //var n = moment.utc(req.body.date);
+    //var n = moment(req.body.date).toISOString();
+    //var n = moment(req.body.date);
+    //var m = moment.utc(z);
+    var z = moment(n);
+    //var o = moment.ISO_8601(n);
+    //var n = moment(req.body.date, moment.ISO_8601);
+    console.log('date: z = ' + z);
+    //console.log('date: m = ' + m);
+    //console.log('date: o = ' + o);
+    //console.log('date: p = ' + p);
+
+    //req.body.date = moment.ISO_8601(req.body.date);
+
+    console.log('updating date = ' + z);
     console.log('id = ' + req.body._id);
-
-    //console.log("formatted date = " + m);
-    var myDateObj = new Object();
-    myDateObj.date = req.body.date;
-    myDateObj.lat = req.body.lat;
-    myDateObj.lon = req.body.lon;
-
-
+    console.log('aID = ' + req.body.aID);
 
     // Push new date onto datesSeen array and then sort in date order. {_id: ObjectID(req.body._id)},
-    Bird.update(  {'myData._id': ObjectID(req.body.aID)}, { $set : { 'myData.$.myDateObj': myDateObj } })
+    //Bird.update(  {'myData._id': ObjectID(req.body.aID)}, { $set : { 'myData.sightingArray': [myDateObj] } })
+
+   //   Bird.findOneAndUpdate( {_id : req.body._id}, { $push : { datesSeen : { $each: [req.body.date], $sort: 1} } }, {runValidators : true})
+    Bird.findOneAndUpdate( {_id: ObjectID(req.body._id) },  { $push : { 'sightData.$.aID': req.body.aID, 'sightData.$.date': z, 'sightData.$.lat': req.body.lat, 'sightData.$.lon': req.body.lon }})
+   // Bird.findOneAndUpdate( { aID: req.body.aID }, { sightData: {  aID: req.body.aID , date: z, lat: req.body.lat, lon: req.body.lon }},false,true)
         .then( (doc) => {
             if (doc) {
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
@@ -239,21 +244,7 @@ router.post('/deleteSighting', function(req, res, next){
 
 
     console.log('deleteingggggggggggggggggggggggg date = ' + req.body.date);
-    console.log('aID = ' + req.body.aID);
     console.log('_id = ' + req.body._id);
-
-
-    // Format it for the current server timezone
-    //req.body.date = m.parseZone().format('dddd, MMMM Do YYYY, h:mm a');
-    //req.body.date = moment.ISO_8601(m);
-
-    console.log("formatted date = " + req.body.date);
-
-
-    var myDateObj = new Object();
-    myDateObj.date = req.body.date;
-    myDateObj.lat = req.body.lat;
-    myDateObj.lon = req.body.lon;
 
     // { 'myData.$.myDateObj': myDateObj }
 
@@ -265,9 +256,12 @@ router.post('/deleteSighting', function(req, res, next){
         //do something smart
     });
 */
-
-    // Bird.update( {_id: ObjectID(req.body._id)},  { $pull : { $in: {  mydata: ObjectID(req.body.aID), myDateObj }}})
-    Bird.update( {_id: ObjectID(req.body._id)},  { $pull : {  mydata: myDateObj }} )
+    // { qty: { $gt: 20 } }
+    // Bird.deleteOne(  {'myData._id': ObjectID(req.body.aID)}, { $unset : { 'myData.$._id': req.body.aID, 'myData.$.myDateObj': myDateObj } })
+    // Bird.update( {_id: ObjectID(req.body._id)}, { $pull: { myData: [ { _id: ObjectID('5a1423c9ac3bbb0fb40e4758'), myDateObj: { date: "Thursday, November 2nd 2017, 5:00 am", lat: "2", lon: "2"}}]}})
+    // Bird.update( {_id: ObjectID(req.body._id)},  { $pull : { 'myData._id': req.body.aID } })
+    Bird.update( {_id: ObjectID(req.body._id)},  { $pull : { sightData: { date: req.body.date, lat: req.body.lat, lon: req.body.lon }}})
+    // Bird.remove( { myData: { $eq: ObjectID(req.body.aID) }} )
         .then( (doc) => {
             /*
             for (item in doc) {
@@ -289,6 +283,18 @@ router.post('/deleteSighting', function(req, res, next){
             }
             */
             if (doc) {
+
+                console.log(doc);
+                console.log('doc = ' + doc);
+
+
+                for (item in res) {
+                    console.log('res item = ' + item);
+                }
+
+                console.log('res.statusCode = ' + res.statusCode);
+                console.log('res.statusMessage = ' + res.statusMessage);
+
                 res.redirect('/bird/' + req.body._id);   // Redirect to this bird's info page
             }
             else {
@@ -297,7 +303,7 @@ router.post('/deleteSighting', function(req, res, next){
         })
         .catch( (err) => {
 
-            console.log(err);
+            console.log('hit a major error: ' + err);
 
             if (err.name === 'CastError') {
                 req.flash('error', 'Date must be in a valid date format');
@@ -385,11 +391,16 @@ router.post('/upheight', function(req, res, next){
         Bird.updateOne({ _id: ObjectID(_id) }, { $set : { height: req.body.height }}, {runValidators : true})
             .then((result) => {
 
-                for (item in result){
+                console.log(result);
+                console.log('result = ' + result);
 
-                    console.log('item = ' + item + " " + result[item]);
+
+                for (item in result) {
+                    console.log('item = ' + item + " = " + result[item]);
                 }
 
+                console.log('res.statusCode = ' + res.statusCode);
+                console.log('res.statusMessage = ' + res.statusMessage);
 
                 if (result.ok) {
                     res.redirect('/bird/' + req.body._id);

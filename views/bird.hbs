@@ -65,41 +65,38 @@
 
     <div class="sighting-list">
 
-        <p>Number of sightings: {{length bird.myData}}</p>
+        <p>Number of sightings: {{length bird.sightData}}</p>
 
         <div class="sighting">
 
 
-            {{#each bird.myData}}
-
+            {{#each bird.sightData}}
                 {{_id}}
-
-                <form method="POST" action="/upSighting">{{myDateObj.date}}<input type="date" name="date" >
-
-                                                                           <input type="hidden" name="_id" value="{{../bird._id}}">
+                <form method="POST" action="/upSighting">{{date}}<input type="date" name="date" >
                                                                            <input type="hidden" name="aID" value="{{_id}}">
-                                                                           <input type="hidden" name="lon" value="{{myDateObj.lon}}">
-                                                                           <input type="hidden" name="lat" value="{{myDateObj.lat}}">
+                                                                           <input type="hidden" name="_id" value="{{../bird._id}}">
+                                                                           <input type="hidden" name="lon" value="{{lon}}">
+                                                                           <input type="hidden" name="lat" value="{{lat}}">
                                                                            <input type="submit" value="Update Date"></form>
-                <form method="POST" action="/deleteSighting" name="daID"><input type="hidden" name="date" value="{{myDateObj.date}}">
-                                                                     <input type="hidden" name="_id" value="{{../bird._id}}">
+                <form method="POST" action="/deleteSighting"><input type="hidden" name="date" value="{{date}}">
                                                                      <input type="hidden" name="aID" value="{{_id}}">
-                                                                     <input type="hidden" name="lat" value="{{myDateObj.lat}}">
-                                                                     <input type="hidden" name="lon" value="{{myDateObj.lon}}">
+                                                                     <input type="hidden" name="_id" value="{{../bird._id}}">
+                                                                     <input type="hidden" name="lat" value="{{lat}}">
+                                                                     <input type="hidden" name="lon" value="{{lon}}">
                                                                      <input type="submit" value="Delete Sighting"></form>
 
-                <form method="POST" action="/upSighting">{{myDateObj.lat}}<input name="lat">
+                <form method="POST" action="/upSighting">{{lat}}<input name="lat">
                                                                           <input type="hidden" name="_id" value="{{../bird._id}}">
                                                                           <input type="hidden" name="aID" value="{{_id}}">
-                                                                          <input type="hidden" name="date" value="{{myDateObj.date}}">
-                                                                          <input type="hidden" name="lon" value="{{myDateObj.lon}}">
+                                                                          <input type="hidden" name="date" value="{{date}}">
+                                                                          <input type="hidden" name="lon" value="{{lon}}">
                                                                           <input type="submit" value="Update Lat"></form>
 
-                <form method="POST" action="/upSighting">{{myDateObj.lon}}<input name="lon">
+                <form method="POST" action="/upSighting">{{lon}}<input name="lon">
                                                                           <input type="hidden" name="_id" value="{{../bird._id}}">
                                                                           <input type="hidden" name="aID" value="{{_id}}">
-                                                                          <input type="hidden" name="date" value="{{myDateObj.date}}">
-                                                                          <input type="hidden" name="lat" value="{{myDateObj.lat}}">
+                                                                          <input type="hidden" name="date" value="{{date}}">
+                                                                          <input type="hidden" name="lat" value="{{lat}}">
                                                                           <input type="submit" value="Update Lon"></form>
 
             {{else}}

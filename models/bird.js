@@ -31,9 +31,7 @@ var birdSchema = new mongoose.Schema({
         max: [50, 'Should not be more than 50 eggs.'] },    // At least 1, no more than 50
     endangered: { type: Boolean, default: false },        // Is bird species threatened with extinction?
 
-    myData: [
-               {arrayId: {type: String}, myDateObj: {type: Object}}
-            ],
+    sightData: [{date: Date, lat: String, lon: String}],
 
       // An array of objects each containing the date, latitude and longitude a bird of this species was seen. Must be now, or in the past
     nest: {
